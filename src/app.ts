@@ -1,6 +1,5 @@
 import dotenv from "dotenv";
 dotenv.config();
-import "./models/connection";
 import express from "express";
 import path from "path";
 import cookieParser from "cookie-parser";
