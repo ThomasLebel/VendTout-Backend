@@ -8,7 +8,11 @@ export interface IUser extends Document {
   username : string;
   aboutDescription: string;
   profilePicture: string;
-  shippingAdress : {street : string, city : string, zipCode : number};
+  country : string;
+  city : string;
+  gender : string;
+  birthDate : Date;
+  shippingAddress : {fullName : string, street : string, city : string, zipCode : number};
   likedProducts : Schema.Types.ObjectId[];
   postedProducts :Schema.Types.ObjectId[];
 }
@@ -22,7 +26,11 @@ const userSchema = new Schema<IUser>(
     username: { type: String, required: true, unique: true },
     aboutDescription: { type: String, required: false, default: "" },
     profilePicture: { type: String, required: false, default: "" },
-    shippingAdress: { type: Object, required: false, default: {street : "", city : "", zipCode : 0}},
+    country: { type: String, required: false, default: "" },
+    city: { type: String, required: false, default: "" },
+    gender: { type: String, required: false, default: "" },
+    birthDate: { type: Date, required: false, default: null },
+    shippingAddress: { type: Object, required: false, default: {fullName : "", street : "", city : "", zipCode : 0}},
     likedProducts: [{ type: Schema.Types.ObjectId, ref: "Product", required: false, default: [] }],
     postedProducts: [{ type: Schema.Types.ObjectId, ref: "Product", required: false, default: [] }],
   },
