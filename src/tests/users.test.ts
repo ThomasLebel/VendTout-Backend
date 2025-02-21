@@ -3,7 +3,7 @@ import app from "../app";
 import mongoose from "mongoose";
 
 
-// Test pour la route POST /users/signup
+
 
 // Connexion avant les tests
 beforeAll(async () => {
@@ -16,6 +16,8 @@ afterAll(async () => {
 });
  
 let token : string;
+
+// Test pour la route POST /users/signup
 
 it("POST /users/signup", async () => {
   const res = await request(app).post("/users/signup").send({
@@ -47,14 +49,12 @@ it("POST /users/signin", async () => {
 it("PUT /users/profile", async () => {
   const res = await request(app).put("/users/profile").send({
     token: token,
-    profilePicture: "test.jpg",
     aboutDescription: "testAboutDescription",
     country: "testCountry",
     city: "testCity",
   });
   expect(res.statusCode).toBe(200);
   expect(res.body.result).toBe(true);
-  expect(res.body.userInfos.profilePicture).toBe("test.jpg");
   expect(res.body.userInfos.aboutDescription).toBe("testAboutDescription");
   expect(res.body.userInfos.country).toBe("testCountry");
   expect(res.body.userInfos.city).toBe("testCity");
@@ -71,7 +71,7 @@ it("PUT /users/info", async () => {
   expect(res.body.result).toBe(true);
   expect(res.body.userInfos.fullName).toBe("testFullName");
   expect(res.body.userInfos.gender).toBe("testGender");
-  expect(res.body.userInfos.birthDate).toBe("2020-01-01T00:00:00.000Z");
+  expect(res.body.userInfos.birthDate).toBe("2020-01-01");
 });
 
 it("PUT /users/shippingAddress", async () => {
@@ -80,19 +80,30 @@ it("PUT /users/shippingAddress", async () => {
     fullName: "testFullName",
     street: "testStreet",
     city: "testCity",
-    zipCode: 12345,
+    zipCode: "12345",
   });
   expect(res.statusCode).toBe(200);
   expect(res.body.result).toBe(true);
   expect(res.body.userInfos.shippingAddress.fullName).toBe("testFullName");
   expect(res.body.userInfos.shippingAddress.street).toBe("testStreet");
   expect(res.body.userInfos.shippingAddress.city).toBe("testCity");
-  expect(res.body.userInfos.shippingAddress.zipCode).toBe(12345);
+  expect(res.body.userInfos.shippingAddress.zipCode).toBe("12345");
+});
+
+it("PUT /users/email", async () => {
+  const res = await request(app).put("/users/email").send({
+    token: token,
+    password: "password123",
+    newEmail : "test2@test.com"
+  });
+  expect(res.statusCode).toBe(200);
+  expect(res.body.result).toBe(true);
+  expect(res.body.userInfos.email).toBe("test2@test.com");
 });
 
 it("DELETE /users/delete", async () => {
   const res = await request(app).delete("/users/delete").send({
-    username: "test",
+    token: token,
     password: "password123",
   });
   expect(res.statusCode).toBe(200);

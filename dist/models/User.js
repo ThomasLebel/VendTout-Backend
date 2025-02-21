@@ -42,7 +42,11 @@ const userSchema = new mongoose_1.Schema({
     username: { type: String, required: true, unique: true },
     aboutDescription: { type: String, required: false, default: "" },
     profilePicture: { type: String, required: false, default: "" },
-    shippingAdress: { type: Object, required: false, default: { street: "", city: "", zipCode: 0 } },
+    country: { type: String, required: false, default: "" },
+    city: { type: String, required: false, default: "" },
+    gender: { type: String, required: false, default: "" },
+    birthDate: { type: Date, required: false, default: null },
+    shippingAddress: { type: Object, required: false, default: { fullName: "", street: "", city: "", zipCode: 0 } },
     likedProducts: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Product", required: false, default: [] }],
     postedProducts: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Product", required: false, default: [] }],
 }, { timestamps: true });

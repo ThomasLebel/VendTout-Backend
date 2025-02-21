@@ -5,7 +5,8 @@ export interface IProduct extends Document {
   title: string;
   description: string;
   photos: string[];
-  category: string;
+  gender: string;
+  subCategory: string;
   brand: string;
   size: string;
   condition: string;
@@ -18,11 +19,12 @@ export interface IProduct extends Document {
 
 const productSchema = new Schema<IProduct>(
   {
-    userID: { type: Schema.Types.ObjectId, ref: "users", required: true },
+    userID: { type: Schema.Types.ObjectId, ref: "User", required: true },
     title: { type: String, required: true },
     description: { type: String, required: true },
-    photos: { type: [String], required: true },
-    category: { type: String, required: true },
+    photos: { type: [String], required: false },
+    gender: { type: String, required: true },
+    subCategory: { type: String, required: true },
     brand: { type: String, required: true },
     size: { type: String, required: true },
     condition: { type: String, required: true },
