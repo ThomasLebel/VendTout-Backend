@@ -59,3 +59,40 @@ it("GET /products/:id", async () => {
     expect(res.body.productInfos.condition).toBe('Neuf');
     expect(res.body.productInfos.color).toBe('Blanc');
 });
+
+// Test pour la route POST /products/like
+
+it("POST /products/like", async () => {
+    const res = await request(app).post("/products/like").send({
+        token : 'bpWzzy3hgspPdNaPTq97cMRCsEnUZt3L',
+        id : productId,
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body.result).toBe(true);
+    expect(res.body.nbLikes).toBe(1);
+    expect(res.body.userInfos.likedProducts).toContain(productId);
+});
+
+// Test pour la route POST /products/like avec un produit déjà liké
+
+it("POST /products/like", async () => {
+    const res = await request(app).post("/products/like").send({
+        token : 'bpWzzy3hgspPdNaPTq97cMRCsEnUZt3L',
+        id : productId,
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body.result).toBe(true);
+    expect(res.body.nbLikes).toBe(0);
+    expect(res.body.userInfos.likedProducts).not.toContain(productId);
+});
+
+// Test pour la route DELETE /products/:id
+
+it("DELETE /products/:id", async () => {
+    const res = await request(app).delete(`/products/${productId}`).send({
+        token : 'bpWzzy3hgspPdNaPTq97cMRCsEnUZt3L',
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body.result).toBe(true);
+    expect(res.body.message).toBe('Product deleted successfully');
+});
