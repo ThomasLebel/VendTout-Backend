@@ -10,6 +10,26 @@ import uid2 from "uid2";
 
 const cloudinary = require("cloudinary").v2;
 
+// Route pour récupérer les derniers produits postés
+router.get('/find/:page', async (req: Request, res: Response) => {
+  try{
+    const page: number = parseInt(req.params.page) || 1;
+    const limit : number = 15;
+    const skip : number = (page - 1) * limit;
+    const products: IProduct[] = await Product.find()
+      .populate("userID", "username profilePicture -_id")
+      .select("-__v")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    const totalProducts: number = await Product.countDocuments();
+    const hasMore: boolean = totalProducts > page * limit;
+    res.status(200).json({ result: true, products: products, hasMore: hasMore });
+  } catch (error) {
+    res.status(500).json({ result: false, error: "Internal server error" });
+  }
+});
+
 // Route pour la création d'un produit
 
 router.post("/addItem", async (req: Request, res: Response) => {
@@ -84,6 +104,7 @@ router.post("/addItem", async (req: Request, res: Response) => {
     res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
+
 
 // Route pour la récupération d'un produit
 

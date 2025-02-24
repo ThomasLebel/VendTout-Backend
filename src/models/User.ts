@@ -32,8 +32,8 @@ const userSchema = new Schema<IUser>(
     gender: { type: String, required: false, default: "" },
     birthDate: { type: String, required: false, default: "" },
     shippingAddress: { type: Object, required: false, default: {fullName : "", street : "", city : "", zipCode : ""}},
-    likedProducts: [{ type: Schema.Types.ObjectId, ref: "Product", required: false, default: [] }],
-    postedProducts: [{ type: Schema.Types.ObjectId, ref: "Product", required: false, default: [] }],
+    likedProducts: [{ type: Schema.Types.ObjectId, ref: "products", required: false, default: [] }],
+    postedProducts: [{ type: Schema.Types.ObjectId, ref: "products", required: false, default: [] }],
   },
   { timestamps: true }
 );

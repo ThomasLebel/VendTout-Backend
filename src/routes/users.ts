@@ -290,6 +290,22 @@ router.put("/email", async (req: Request, res: Response) => {
   }
 });
 
+// Route pour récupérer les articles favoris
+router.get("/favourites/:userToken", async (req: Request, res: Response) => {
+  try {
+    User.findOne({ token: req.params.userToken }).populate({path : "likedProducts", select : '-__v', populate : {path : 'userID', select : 'username profilePicture -_id'}})
+      .then((user) => {
+        if (!user){
+          res.status(400).json({ result: false, error: "User not found" });
+        } else {
+          res.status(200).json({ result: true, products: user.likedProducts });
+        }
+      })
+  } catch (error: any) {
+    res.status(500).json({ result: false, error: error.message });
+  }
+});
+
 // Route pour la suppresion d'un utilisateur
 
 router.delete("/delete", async (req: Request, res: Response) => {
