@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IProduct extends Document {
   _id: Schema.Types.ObjectId;
-  userID: Schema.Types.ObjectId;
+  userID: Schema.Types.ObjectId | { username: string; profilePicture: string };
   title: string;
   description: string;
   photos: string[];

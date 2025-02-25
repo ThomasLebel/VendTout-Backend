@@ -120,6 +120,7 @@ router.get("/:id", async (req: Request, res: Response) => {
       product.nbViews++;
       await product.save();
       res.status(200).json({ result: true, productInfos: product });
+      
     }
   } catch (error) {
     res.status(500).json({ result: false, error: "Internal server error" });
@@ -202,6 +203,16 @@ router.delete("/:id", async (req: Request, res: Response) => {
             res.status(401).json({ result: false, error: "Unauthorized" });
             return;
           } else {
+            
+            // On supprime les photos uploadées sur Cloudinary
+            const photosUrl: string[] = product.photos;
+            const deleteImagePromises = photosUrl.map((photoUrl) => {
+              const publicId = photoUrl.match(/\/v\d+\/(.+)\.\w+$/)?.[1];
+              return publicId ? cloudinary.uploader.destroy(publicId) : null;
+            });
+
+            await Promise.all(deleteImagePromises);
+
             // On retire le produit des produits likés des utilisateurs
             const productDeleted: IProduct | null =
               await Product.findByIdAndDelete(req.params.id);

@@ -7,8 +7,7 @@ import uid2 from "uid2";
 import { UploadedFile } from "express-fileupload";
 import fs from "fs";
 
-const cloudinary = require('cloudinary').v2;
-
+const cloudinary = require("cloudinary").v2;
 
 // Route pour l'inscription d'un utilisateur
 
@@ -43,8 +42,8 @@ router.post("/signup", async (req: Request, res: Response) => {
           const hash = bcryptjs.hashSync(req.body.password, 10);
           // On crée un nouvel utilisateur
           const newUser = new User({
-            username: req.body.username,
-            email: req.body.email,
+            username: req.body.username.toLowerCase(),
+            email: req.body.email.toLowerCase(),
             password: hash,
             token: token,
           });
@@ -74,7 +73,7 @@ router.post("/signin", async (req: Request, res: Response) => {
     } else {
       // On vérifie si l'utilisateur existe
       let user: IUser | null = await User.findOne({
-        username: req.body.identifier,
+        username: req.body.identifier.toLowerCase(),
       });
       if (!user) {
         user = await User.findOne({ email: req.body.identifier });
@@ -113,12 +112,7 @@ router.put("/profile", async (req: Request, res: Response) => {
   try {
     // On vérifie que le corps de la requête contient les champs requis
     if (
-      !checkBody(req.body, [
-        "token",
-        "aboutDescription",
-        "country",
-        "city",
-      ])
+      !checkBody(req.body, ["token", "aboutDescription", "country", "city"])
     ) {
       res.status(400).json({ result: false, error: "Missing or empty fields" });
       return;
@@ -135,19 +129,30 @@ router.put("/profile", async (req: Request, res: Response) => {
         user.city = req.body.city;
 
         // On vérifie si l'utilisateur a uploadé une image de profil
-        if (req.files?.profilePicture){
-          const photoPath : string = `./tmp/${uid2(16)}.jpg`;
+        if (req.files?.profilePicture) {
+          // On supprime l'ancien avatar uploadé sur Cloudinary
+          if (user.profilePicture !== "https://res.cloudinary.com/dkf48p2ah/image/upload/v1739809289/VendToutAvatars/mk8ihczepktfn61qdzh1.jpg"){
+            const publicId = user.profilePicture.match(/\/v\d+\/(.+)\.\w+$/)?.[1];
+            await cloudinary.uploader.destroy(publicId);
+          }
+          // On upload le nouvel avatar sur cloudinary
+          const photoPath: string = `./tmp/${uid2(16)}.jpg`;
           const profilePicture = req.files.profilePicture as UploadedFile;
           profilePicture.mv(photoPath);
-          const resultCloudinary = await cloudinary.uploader.upload(photoPath,{
-            folder : "VendToutAvatars",
-            resource_type : "auto",
-          })
+          const resultCloudinary = await cloudinary.uploader.upload(photoPath, {
+            folder: "VendToutAvatars",
+            resource_type: "auto",
+          });
           fs.unlinkSync(photoPath);
-          if (resultCloudinary){
+          if (resultCloudinary) {
             user.profilePicture = resultCloudinary.secure_url;
           } else {
-            res.status(400).json({ result: false, error: "Error uploading profile picture" });
+            res
+              .status(400)
+              .json({
+                result: false,
+                error: "Error uploading profile picture",
+              });
             return;
           }
         }
@@ -261,7 +266,7 @@ router.put("/password", async (req: Request, res: Response) => {
 
 router.put("/email", async (req: Request, res: Response) => {
   try {
-    // On vérifie que le corps de la requête contient les champs requis 
+    // On vérifie que le corps de la requête contient les champs requis
     if (!checkBody(req.body, ["token", "password", "newEmail"])) {
       res.status(400).json({ result: false, error: "Missing or empty fields" });
       return;
@@ -293,14 +298,56 @@ router.put("/email", async (req: Request, res: Response) => {
 // Route pour récupérer les articles favoris
 router.get("/favourites/:userToken", async (req: Request, res: Response) => {
   try {
-    User.findOne({ token: req.params.userToken }).populate({path : "likedProducts", select : '-__v', populate : {path : 'userID', select : 'username profilePicture -_id'}})
+    User.findOne({ token: req.params.userToken })
+      .populate({
+        path: "likedProducts",
+        select: "-__v",
+        populate: { path: "userID", select: "username profilePicture -_id" },
+      })
       .then((user) => {
-        if (!user){
+        if (!user) {
           res.status(400).json({ result: false, error: "User not found" });
         } else {
           res.status(200).json({ result: true, products: user.likedProducts });
         }
-      })
+      });
+  } catch (error: any) {
+    res.status(500).json({ result: false, error: error.message });
+  }
+});
+
+// Route pour récupérer les produits postés par un utilisateur
+router.get("/postedProducts/:username", async (req: Request, res: Response) => {
+  try {
+    const user = await User.findOne({ username: req.params.username }).populate(
+      {
+        path: "postedProducts",
+        select: "-__v",
+        populate: { path: "userID", select: "username profilePicture -_id" },
+      }
+    );
+
+    if (!user) {
+      res.status(400).json({ result: false, error: "User not found" });
+    } else {
+      const userInfos = {
+        username: user.username,
+        profilePicture: user.profilePicture,
+        country: user.country,
+        city: user.city,
+        aboutDescription: user.aboutDescription,
+      };
+      const sortedPostedProducts = user.postedProducts.sort(
+        (a : any, b: any) => b.createdAt - a.createdAt
+      );
+      res
+        .status(200)
+        .json({
+          result: true,
+          products: sortedPostedProducts,
+          userInfos: userInfos,
+        });
+    }
   } catch (error: any) {
     res.status(500).json({ result: false, error: error.message });
   }
@@ -326,6 +373,11 @@ router.delete("/delete", async (req: Request, res: Response) => {
           res.status(400).json({ result: false, error: "Invalid password" });
           return;
         } else {
+          // On supprime l'avatar uploadé sur Cloudinary
+          if (user.profilePicture !== "https://res.cloudinary.com/dkf48p2ah/image/upload/v1739809289/VendToutAvatars/mk8ihczepktfn61qdzh1.jpg"){
+            const publicId = user.profilePicture.match(/\/v\d+\/(.+)\.\w+$/)?.[1];
+          await cloudinary.uploader.destroy(publicId);
+          }
           // On supprime l'utilisateur
           await User.deleteOne({ token: req.body.token });
           res.status(200).json({ result: true, message: "User deleted" });
