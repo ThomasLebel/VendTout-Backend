@@ -57,8 +57,12 @@ router.post("/signup", async (req: Request, res: Response) => {
         }
       }
     }
-  } catch (error: any) {
-    res.status(500).json({ result: false, error: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ result: false, error: error.message });
+      return;
+    }
+    res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
 
@@ -101,8 +105,12 @@ router.post("/signin", async (req: Request, res: Response) => {
         }
       }
     }
-  } catch (error: any) {
-    res.status(500).json({ result: false, error: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ result: false, error: error.message });
+      return;
+    }
+    res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
 
@@ -131,8 +139,12 @@ router.put("/profile", async (req: Request, res: Response) => {
         // On vérifie si l'utilisateur a uploadé une image de profil
         if (req.files?.profilePicture) {
           // On supprime l'ancien avatar uploadé sur Cloudinary
-          if (user.profilePicture !== "https://res.cloudinary.com/dkf48p2ah/image/upload/v1739809289/VendToutAvatars/mk8ihczepktfn61qdzh1.jpg"){
-            const publicId = user.profilePicture.match(/\/v\d+\/(.+)\.\w+$/)?.[1];
+          if (
+            user.profilePicture !==
+            "https://res.cloudinary.com/dkf48p2ah/image/upload/v1739809289/VendToutAvatars/mk8ihczepktfn61qdzh1.jpg"
+          ) {
+            const publicId =
+              user.profilePicture.match(/\/v\d+\/(.+)\.\w+$/)?.[1];
             await cloudinary.uploader.destroy(publicId);
           }
           // On upload le nouvel avatar sur cloudinary
@@ -147,12 +159,10 @@ router.put("/profile", async (req: Request, res: Response) => {
           if (resultCloudinary) {
             user.profilePicture = resultCloudinary.secure_url;
           } else {
-            res
-              .status(400)
-              .json({
-                result: false,
-                error: "Error uploading profile picture",
-              });
+            res.status(400).json({
+              result: false,
+              error: "Error uploading profile picture",
+            });
             return;
           }
         }
@@ -161,8 +171,12 @@ router.put("/profile", async (req: Request, res: Response) => {
         res.status(200).json({ result: true, userInfos });
       }
     }
-  } catch (error: any) {
-    res.status(500).json({ result: false, error: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ result: false, error: error.message });
+      return;
+    }
+    res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
 
@@ -224,8 +238,12 @@ router.put("/shippingAddress", async (req: Request, res: Response) => {
         res.status(200).json({ result: true, userInfos });
       }
     }
-  } catch (error: any) {
-    res.status(500).json({ result: false, error: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ result: false, error: error.message });
+      return;
+    }
+    res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
 
@@ -257,8 +275,12 @@ router.put("/password", async (req: Request, res: Response) => {
         }
       }
     }
-  } catch (error: any) {
-    res.status(500).json({ result: false, error: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ result: false, error: error.message });
+      return;
+    }
+    res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
 
@@ -290,8 +312,12 @@ router.put("/email", async (req: Request, res: Response) => {
         }
       }
     }
-  } catch (error: any) {
-    res.status(500).json({ result: false, error: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ result: false, error: error.message });
+      return;
+    }
+    res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
 
@@ -311,8 +337,12 @@ router.get("/favourites/:userToken", async (req: Request, res: Response) => {
           res.status(200).json({ result: true, products: user.likedProducts });
         }
       });
-  } catch (error: any) {
-    res.status(500).json({ result: false, error: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ result: false, error: error.message });
+      return;
+    }
+    res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
 
@@ -338,18 +368,20 @@ router.get("/postedProducts/:username", async (req: Request, res: Response) => {
         aboutDescription: user.aboutDescription,
       };
       const sortedPostedProducts = user.postedProducts.sort(
-        (a : any, b: any) => b.createdAt - a.createdAt
+        (a: any, b: any) => b.createdAt - a.createdAt
       );
-      res
-        .status(200)
-        .json({
-          result: true,
-          products: sortedPostedProducts,
-          userInfos: userInfos,
-        });
+      res.status(200).json({
+        result: true,
+        products: sortedPostedProducts,
+        userInfos: userInfos,
+      });
     }
-  } catch (error: any) {
-    res.status(500).json({ result: false, error: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ result: false, error: error.message });
+      return;
+    }
+    res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
 
@@ -374,9 +406,13 @@ router.delete("/delete", async (req: Request, res: Response) => {
           return;
         } else {
           // On supprime l'avatar uploadé sur Cloudinary
-          if (user.profilePicture !== "https://res.cloudinary.com/dkf48p2ah/image/upload/v1739809289/VendToutAvatars/mk8ihczepktfn61qdzh1.jpg"){
-            const publicId = user.profilePicture.match(/\/v\d+\/(.+)\.\w+$/)?.[1];
-          await cloudinary.uploader.destroy(publicId);
+          if (
+            user.profilePicture !==
+            "https://res.cloudinary.com/dkf48p2ah/image/upload/v1739809289/VendToutAvatars/mk8ihczepktfn61qdzh1.jpg"
+          ) {
+            const publicId =
+              user.profilePicture.match(/\/v\d+\/(.+)\.\w+$/)?.[1];
+            await cloudinary.uploader.destroy(publicId);
           }
           // On supprime l'utilisateur
           await User.deleteOne({ token: req.body.token });
@@ -384,8 +420,12 @@ router.delete("/delete", async (req: Request, res: Response) => {
         }
       }
     }
-  } catch (error: any) {
-    res.status(500).json({ result: false, error: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ result: false, error: error.message });
+      return;
+    }
+    res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
 

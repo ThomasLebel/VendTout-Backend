@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { query, Request, Response } from "express";
 var router = express.Router();
 import mongoose from "mongoose";
 import checkBody from "../modules/checkBody";
@@ -11,11 +11,11 @@ import uid2 from "uid2";
 const cloudinary = require("cloudinary").v2;
 
 // Route pour récupérer les derniers produits postés
-router.get('/find/:page', async (req: Request, res: Response) => {
-  try{
+router.get("/find/:page", async (req: Request, res: Response) => {
+  try {
     const page: number = parseInt(req.params.page) || 1;
-    const limit : number = 15;
-    const skip : number = (page - 1) * limit;
+    const limit: number = 15;
+    const skip: number = (page - 1) * limit;
     const products: IProduct[] = await Product.find()
       .populate("userID", "username profilePicture -_id")
       .select("-__v")
@@ -24,8 +24,14 @@ router.get('/find/:page', async (req: Request, res: Response) => {
       .limit(limit);
     const totalProducts: number = await Product.countDocuments();
     const hasMore: boolean = totalProducts > page * limit;
-    res.status(200).json({ result: true, products: products, hasMore: hasMore });
+    res
+      .status(200)
+      .json({ result: true, products: products, hasMore: hasMore });
   } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ result: false, error: error.message });
+      return;
+    }
     res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
@@ -101,12 +107,15 @@ router.post("/addItem", async (req: Request, res: Response) => {
       }
     }
   } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ result: false, error: error.message });
+      return;
+    }
     res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
 
-
-// Route pour la récupération d'un produit
+// Route pour la récupération d'un produit selon son id
 
 router.get("/:id", async (req: Request, res: Response) => {
   try {
@@ -120,9 +129,12 @@ router.get("/:id", async (req: Request, res: Response) => {
       product.nbViews++;
       await product.save();
       res.status(200).json({ result: true, productInfos: product });
-      
     }
   } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ result: false, error: error.message });
+      return;
+    }
     res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
@@ -175,6 +187,67 @@ router.post("/like", async (req: Request, res: Response) => {
       }
     }
   } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ result: false, error: error.message });
+      return;
+    }
+    res.status(500).json({ result: false, error: "Internal server error" });
+  }
+});
+
+// Route pour récupérer les produits avec des filtres
+router.post("/filteredProducts", async (req: Request, res: Response) => {
+  try {
+    const { globalSearch, gender, subCategory, size, condition, color, brand } =
+      req.body;
+    const query: any = {};
+
+    if (globalSearch) {
+      const wordsToSearch: string[] = globalSearch.split(" ");
+
+      query.$and = wordsToSearch.map((word: string) => ({
+        $or: [
+          { title: { $regex: word, $options: "i" } },
+          { description: { $regex: word, $options: "i" } },
+          { brand: { $regex: word, $options: "i" } },
+          { color: { $regex: word, $options: "i" } },
+          { gender: { $regex: word, $options: "i" } },
+          { subCategory: { $regex: word, $options: "i" } },
+        ],
+      }));
+    }
+
+    if (gender) {
+      query.gender = {$regex : gender, $options: "i"};
+    }
+    if (subCategory) {
+      query.subCategory = {$regex : subCategory, $options: "i"};
+    }
+    if (size) {
+      query.size = {$regex : size, $options: "i"};
+    }
+    if (condition) {
+      query.condition = {$regex : `^${condition}$`, $options: "i"};
+    }
+    if (color) {
+      query.color = {$regex : color, $options: "i"};
+    }
+    if (brand) {
+      query.brand = {$regex : brand, $options: "i"};
+    }
+    console.log(query);
+
+    const products: IProduct[] = await Product.find(query)
+      .populate("userID", "username profilePicture -_id")
+      .select("-__v")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ result: true, products: products });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ result: false, error: error.message });
+      return;
+    }
     res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
@@ -203,7 +276,6 @@ router.delete("/:id", async (req: Request, res: Response) => {
             res.status(401).json({ result: false, error: "Unauthorized" });
             return;
           } else {
-            
             // On supprime les photos uploadées sur Cloudinary
             const photosUrl: string[] = product.photos;
             const deleteImagePromises = photosUrl.map((photoUrl) => {
@@ -230,18 +302,20 @@ router.delete("/:id", async (req: Request, res: Response) => {
                 { likedProducts: productDeleted.id },
                 { $pull: { likedProducts: productDeleted.id } }
               );
-              res
-                .status(200)
-                .json({
-                  result: true,
-                  message: "Product deleted successfully",
-                });
+              res.status(200).json({
+                result: true,
+                message: "Product deleted successfully",
+              });
             }
           }
         }
       }
     }
   } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ result: false, error: error.message });
+      return;
+    }
     res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
