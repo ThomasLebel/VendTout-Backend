@@ -114,6 +114,20 @@ router.post("/signin", async (req: Request, res: Response) => {
   }
 });
 
+// Route pour rechercher les utilisateurs selon un pseudo
+router.get("/:username", async (req: Request, res: Response) => {
+  try {
+    const users = await User.find({username: { $regex: req.params.username, $options: "i" } }).select('username profilePicture -_id')
+    res.status(200).json({ result: true, users: users });
+  }  catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ result: false, error: error.message });
+      return;
+    }
+    res.status(500).json({ result: false, error: "Internal server error" });
+  }
+})
+
 // Route pour la modification du profil d'un utilisateur
 
 router.put("/profile", async (req: Request, res: Response) => {
