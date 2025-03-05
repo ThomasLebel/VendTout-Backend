@@ -5,6 +5,7 @@ import path from "path";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
 import cors from "cors";
+import { connectDatabase } from "./models/connection";
 
 import indexRouter from "./routes/index";
 import usersRouter from "./routes/users";
@@ -13,13 +14,15 @@ import ordersRouter from "./routes/orders";
 
 const app = express();
 
+// Connexion à la base de données
+connectDatabase().catch(console.error);
+
 // Configuration de fileUpload
-const fileUpload = require('express-fileupload');
+const fileUpload = require("express-fileupload");
 app.use(fileUpload());
 
 // Configuration de CORS
 app.use(cors());
-
 
 // Configuration des middlewares
 app.use(logger("dev"));
@@ -32,6 +35,6 @@ app.use(cookieParser());
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/products", productsRouter);
-app.use('/orders', ordersRouter)
+app.use("/orders", ordersRouter);
 
 export default app;
