@@ -17,7 +17,7 @@ const connection_1 = require("./models/connection");
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield (0, connection_1.connectDatabase)();
-        const PORT = process.env.PORT || 3000;
+        const PORT = process.env.PORT || 3001;
         app_1.default.listen(PORT, () => {
             console.log(`✅ Serveur démarré sur http://localhost:${PORT}`);
         });

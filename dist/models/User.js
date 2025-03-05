@@ -41,14 +41,14 @@ const userSchema = new mongoose_1.Schema({
     token: { type: String, required: true },
     username: { type: String, required: true, unique: true },
     aboutDescription: { type: String, required: false, default: "" },
-    profilePicture: { type: String, required: false, default: "" },
+    profilePicture: { type: String, required: false, default: "https://res.cloudinary.com/dkf48p2ah/image/upload/v1739526042/idkhe6v85woa3fdoszls.jpg" },
     country: { type: String, required: false, default: "" },
     city: { type: String, required: false, default: "" },
     gender: { type: String, required: false, default: "" },
-    birthDate: { type: Date, required: false, default: null },
-    shippingAddress: { type: Object, required: false, default: { fullName: "", street: "", city: "", zipCode: 0 } },
-    likedProducts: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Product", required: false, default: [] }],
-    postedProducts: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Product", required: false, default: [] }],
+    birthDate: { type: String, required: false, default: "" },
+    shippingAddress: { type: Object, required: false, default: { fullName: "", street: "", city: "", zipCode: "" } },
+    likedProducts: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "products", required: false, default: [] }],
+    postedProducts: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "products", required: false, default: [] }],
 }, { timestamps: true });
 const User = mongoose_1.default.model("User", userSchema);
 exports.default = User;
