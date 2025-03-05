@@ -16,7 +16,13 @@ const products_1 = __importDefault(require("./routes/products"));
 const orders_1 = __importDefault(require("./routes/orders"));
 const app = (0, express_1.default)();
 // Configuration de CORS
-app.use((0, cors_1.default)());
+const corsOptions = {
+    origin: 'http://localhost:3000', // Autoriser votre frontend local
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
+    credentials: true, // Autoriser les cookies
+};
+// Configuration de CORS
+app.use((0, cors_1.default)(corsOptions));
 // Connexion à la base de données
 (0, connection_1.connectDatabase)().catch(console.error);
 // Configuration de fileUpload

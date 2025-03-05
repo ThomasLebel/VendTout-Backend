@@ -15,7 +15,14 @@ import ordersRouter from "./routes/orders";
 const app = express();
 
 // Configuration de CORS
-app.use(cors());
+const corsOptions = {
+    origin: 'http://localhost:3000', // Autoriser votre frontend local
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
+    credentials: true, // Autoriser les cookies
+  };
+
+// Configuration de CORS
+app.use(cors(corsOptions));
 
 // Connexion à la base de données
 connectDatabase().catch(console.error);
