@@ -16,7 +16,7 @@ router.get("/find/:page", async (req: Request, res: Response) => {
     const page: number = parseInt(req.params.page) || 1;
     const limit: number = 15;
     const skip: number = (page - 1) * limit;
-    const products: IProduct[] = await Product.find()
+    const products: IProduct[] = await Product.find({isSold : false})
       .populate("userID", "username profilePicture -_id")
       .select("-__v")
       .sort({ createdAt: -1 })
@@ -235,7 +235,7 @@ router.post("/filteredProducts", async (req: Request, res: Response) => {
     if (brand) {
       query.brand = {$regex : brand, $options: "i"};
     }
-    console.log(query);
+    query.isSold = false
 
     const products: IProduct[] = await Product.find(query)
       .populate("userID", "username profilePicture -_id")

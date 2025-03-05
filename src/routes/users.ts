@@ -58,10 +58,6 @@ router.post("/signup", async (req: Request, res: Response) => {
       }
     }
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ result: false, error: error.message });
-      return;
-    }
     res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
@@ -106,10 +102,6 @@ router.post("/signin", async (req: Request, res: Response) => {
       }
     }
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ result: false, error: error.message });
-      return;
-    }
     res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
@@ -117,16 +109,33 @@ router.post("/signin", async (req: Request, res: Response) => {
 // Route pour rechercher les utilisateurs selon un pseudo
 router.get("/:username", async (req: Request, res: Response) => {
   try {
-    const users = await User.find({username: { $regex: req.params.username, $options: "i" } }).select('username profilePicture -_id')
+    const users = await User.find({
+      username: { $regex: req.params.username, $options: "i" },
+    }).select("username profilePicture -_id");
     res.status(200).json({ result: true, users: users });
-  }  catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ result: false, error: error.message });
-      return;
-    }
+  } catch (error) {
     res.status(500).json({ result: false, error: "Internal server error" });
   }
-})
+});
+
+// Route pour récupérer la photo de profil d'un utilisateur selon son pseudo
+router.get("/profilePicture/:username", async (req: Request, res: Response) => {
+  try {
+    User.findOne({ username: req.params.username })
+      .select("profilePicture")
+      .then((user) => {
+        if (user) {
+          res
+            .status(200)
+            .json({ result: true, profilePicture: user.profilePicture });
+        } else {
+          res.status(400).json({ result: false, error: "User not found" });
+        }
+      });
+  } catch (error) {
+    res.status(500).json({ result: false, error: "Internal server error" });
+  }
+});
 
 // Route pour la modification du profil d'un utilisateur
 
@@ -186,10 +195,6 @@ router.put("/profile", async (req: Request, res: Response) => {
       }
     }
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ result: false, error: error.message });
-      return;
-    }
     res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
@@ -212,8 +217,8 @@ router.put("/info", async (req: Request, res: Response) => {
       const { password, _id, __v, ...userInfos } = user.toObject();
       res.status(200).json({ result: true, userInfos });
     }
-  } catch (error: any) {
-    res.status(500).json({ result: false, error: error.message });
+  } catch (error) {
+    res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
 
@@ -253,10 +258,6 @@ router.put("/shippingAddress", async (req: Request, res: Response) => {
       }
     }
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ result: false, error: error.message });
-      return;
-    }
     res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
@@ -290,10 +291,6 @@ router.put("/password", async (req: Request, res: Response) => {
       }
     }
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ result: false, error: error.message });
-      return;
-    }
     res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
@@ -327,10 +324,6 @@ router.put("/email", async (req: Request, res: Response) => {
       }
     }
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ result: false, error: error.message });
-      return;
-    }
     res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
@@ -352,10 +345,6 @@ router.get("/favourites/:userToken", async (req: Request, res: Response) => {
         }
       });
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ result: false, error: error.message });
-      return;
-    }
     res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
@@ -391,10 +380,6 @@ router.get("/postedProducts/:username", async (req: Request, res: Response) => {
       });
     }
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ result: false, error: error.message });
-      return;
-    }
     res.status(500).json({ result: false, error: "Internal server error" });
   }
 });
@@ -435,10 +420,6 @@ router.delete("/delete", async (req: Request, res: Response) => {
       }
     }
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ result: false, error: error.message });
-      return;
-    }
     res.status(500).json({ result: false, error: "Internal server error" });
   }
 });

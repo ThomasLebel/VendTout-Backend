@@ -33,6 +33,8 @@ it("POST /users/signup", async () => {
   expect(res.body.userInfos.token).toEqual(expect.any(String));
 });
 
+// Test pour la route POST /users/signin
+
 it("POST /users/signin", async () => {
   const res = await request(app).post("/users/signin").send({
     identifier: "test",
@@ -101,6 +103,13 @@ it("PUT /users/email", async () => {
   expect(res.body.userInfos.email).toBe("test2@test.com");
 });
 
+it("GET /users/profilePicture/:username", async () => {
+  const res = await request(app).get("/users/profilePicture/test");
+  expect(res.statusCode).toBe(200);
+  expect(res.body.result).toBe(true);
+  expect(res.body.profilePicture).toBe("https://res.cloudinary.com/dkf48p2ah/image/upload/v1739526042/idkhe6v85woa3fdoszls.jpg");
+});
+
 it("DELETE /users/delete", async () => {
   const res = await request(app).delete("/users/delete").send({
     token: token,
@@ -110,4 +119,3 @@ it("DELETE /users/delete", async () => {
   expect(res.body.result).toBe(true);
   expect(res.body.message).toBe("User deleted");
 });
-

@@ -9,6 +9,7 @@ import cors from "cors";
 import indexRouter from "./routes/index";
 import usersRouter from "./routes/users";
 import productsRouter from "./routes/products";
+import ordersRouter from "./routes/orders";
 
 const app = express();
 
@@ -31,5 +32,6 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/products", productsRouter);
+app.use('/orders', ordersRouter)
 
 export default app;
