@@ -14,15 +14,15 @@ import ordersRouter from "./routes/orders";
 
 const app = express();
 
+// Configuration de CORS
+app.use(cors());
+
 // Connexion à la base de données
 connectDatabase().catch(console.error);
 
 // Configuration de fileUpload
 const fileUpload = require("express-fileupload");
 app.use(fileUpload());
-
-// Configuration de CORS
-app.use(cors());
 
 // Configuration des middlewares
 app.use(logger("dev"));
