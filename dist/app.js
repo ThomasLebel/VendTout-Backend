@@ -15,13 +15,13 @@ const users_1 = __importDefault(require("./routes/users"));
 const products_1 = __importDefault(require("./routes/products"));
 const orders_1 = __importDefault(require("./routes/orders"));
 const app = (0, express_1.default)();
+// Configuration de CORS
+app.use((0, cors_1.default)());
 // Connexion à la base de données
 (0, connection_1.connectDatabase)().catch(console.error);
 // Configuration de fileUpload
 const fileUpload = require("express-fileupload");
 app.use(fileUpload());
-// Configuration de CORS
-app.use((0, cors_1.default)());
 // Configuration des middlewares
 app.use((0, morgan_1.default)("dev"));
 app.use(express_1.default.json());
