@@ -17,7 +17,7 @@ const orders_1 = __importDefault(require("./routes/orders"));
 const app = (0, express_1.default)();
 // Configuration de CORS
 const corsOptions = {
-    origin: 'http://localhost:3000', // Autoriser votre frontend local
+    origin: 'https://vendtout-git-main-thomas-lebels-projects.vercel.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
     credentials: true, // Autoriser les cookies
 };
