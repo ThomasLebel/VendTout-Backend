@@ -16,7 +16,7 @@ const app = express();
 
 // Configuration de CORS
 const corsOptions = {
-    origin: 'https://vendtout-git-main-thomas-lebels-projects.vercel.app',
+    origin: 'https://vendtout.vercel.app/',
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
     credentials: true, // Autoriser les cookies
   };
