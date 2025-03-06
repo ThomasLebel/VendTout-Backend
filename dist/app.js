@@ -17,7 +17,7 @@ const orders_1 = __importDefault(require("./routes/orders"));
 const app = (0, express_1.default)();
 // Configuration de CORS
 const corsOptions = {
-    origin: 'https://vendtout.vercel.app/',
+    origin: 'https://vendtout.vercel.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
     credentials: true, // Autoriser les cookies
 };
