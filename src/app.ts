@@ -16,7 +16,7 @@ const app = express();
 
 // Configuration de CORS
 const corsOptions = {
-    origin: 'https://vendtout.vercel.app',
+    origin: ['https://vendtout.vercel.app', 'http://localhost:3000'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
     credentials: true, // Autoriser les cookies
   };
