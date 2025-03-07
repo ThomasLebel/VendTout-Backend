@@ -22,14 +22,25 @@ const checkBody_1 = __importDefault(require("../modules/checkBody"));
 router.post("/add", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // On vérifie que le corps de la requête contient les champs requis
-        if (!(0, checkBody_1.default)(req.body, ["productID", "buyerUsername", "sellerUsername", "totalPrice", "sellerPrice", "paymentMethod"])) {
+        if (!(0, checkBody_1.default)(req.body, [
+            "productID",
+            "buyerUsername",
+            "sellerUsername",
+            "totalPrice",
+            "sellerPrice",
+            "paymentMethod",
+        ])) {
             res.status(400).json({ result: false, error: "Missing or empty fields" });
             return;
         }
         else {
             // On vérifie si les utilisateurs existent
-            const buyer = yield User_1.default.findOne({ username: req.body.buyerUsername });
-            const seller = yield User_1.default.findOne({ username: req.body.sellerUsername });
+            const buyer = yield User_1.default.findOne({
+                username: req.body.buyerUsername,
+            });
+            const seller = yield User_1.default.findOne({
+                username: req.body.sellerUsername,
+            });
             if (!buyer || !seller) {
                 res.status(400).json({ result: false, error: "User not found" });
                 return;
@@ -50,13 +61,26 @@ router.post("/add", (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                         totalPrice: req.body.totalPrice,
                         sellerPrice: req.body.sellerPrice,
                         paymentMethod: req.body.paymentMethod,
-                        status: "En attente"
+                        status: "En attente",
                     });
                     yield orderToAdd.save();
-                    // product.isSold = true
-                    // await product.save()
-                    const chatID = [req.body.buyerUsername, req.body.sellerUsername].sort().join("_");
-                    res.status(200).json({ result: true, chatID: chatID, productID: product._id, buyerUsername: buyer.username, buyerProfilePicture: buyer.profilePicture, sellerUsername: seller.username, sellerProfilePicture: seller.profilePicture });
+                    product.isSold = true;
+                    yield product.save();
+                    const chatID = [req.body.buyerUsername, req.body.sellerUsername].sort().join("_") +
+                        "_" +
+                        product._id;
+                    res
+                        .status(200)
+                        .json({
+                        result: true,
+                        chatID: chatID,
+                        productID: product._id,
+                        productTitle: product.title,
+                        buyerUsername: buyer.username,
+                        buyerProfilePicture: buyer.profilePicture,
+                        sellerUsername: seller.username,
+                        sellerProfilePicture: seller.profilePicture,
+                    });
                 }
             }
         }
@@ -75,13 +99,18 @@ router.put("/productSent", (req, res) => __awaiter(void 0, void 0, void 0, funct
             return;
         }
         else {
-            const user = yield User_1.default.findOne({ token: req.body.userToken });
+            const user = yield User_1.default.findOne({
+                token: req.body.userToken,
+            });
             if (!user) {
                 res.status(400).json({ result: false, error: "User not found" });
                 return;
             }
             else {
-                const order = yield Order_1.default.findOne({ product: req.body.productID, seller: user._id });
+                const order = yield Order_1.default.findOne({
+                    product: req.body.productID,
+                    seller: user._id,
+                });
                 if (!order) {
                     res.status(400).json({ result: false, error: "Product not found" });
                     return;
@@ -109,13 +138,18 @@ router.put("/productReceived", (req, res) => __awaiter(void 0, void 0, void 0, f
             return;
         }
         else {
-            const user = yield User_1.default.findOne({ token: req.body.userToken });
+            const user = yield User_1.default.findOne({
+                token: req.body.userToken,
+            });
             if (!user) {
                 res.status(400).json({ result: false, error: "User not found" });
                 return;
             }
             else {
-                const order = yield Order_1.default.findOne({ product: req.body.productID, buyer: user._id });
+                const order = yield Order_1.default.findOne({
+                    product: req.body.productID,
+                    buyer: user._id,
+                });
                 if (!order) {
                     res.status(400).json({ result: false, error: "Product not found" });
                     return;
@@ -135,7 +169,7 @@ router.put("/productReceived", (req, res) => __awaiter(void 0, void 0, void 0, f
     }
 }));
 // Route pour récupérer les commandes d'un utilisateur
-router.get('/:usertoken', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/:usertoken", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const usertoken = req.params.usertoken;
         const user = yield User_1.default.findOne({ token: usertoken });
@@ -144,8 +178,14 @@ router.get('/:usertoken', (req, res) => __awaiter(void 0, void 0, void 0, functi
             return;
         }
         else {
-            const orders = yield Order_1.default.find({ buyer: user._id }).populate('product', 'title photos').populate('seller', 'username -_id').select('-buyer -_id -__v');
-            const sales = yield Order_1.default.find({ seller: user._id }).populate('product', 'title photos').populate('buyer', 'username -_id').select('-seller -_id -__v');
+            const orders = yield Order_1.default.find({ buyer: user._id })
+                .populate("product", "title photos")
+                .populate("seller", "username -_id")
+                .select("-buyer -_id -__v");
+            const sales = yield Order_1.default.find({ seller: user._id })
+                .populate("product", "title photos")
+                .populate("buyer", "username -_id")
+                .select("-seller -_id -__v");
             res.status(200).json({ result: true, orders: orders, sales: sales });
         }
     }
