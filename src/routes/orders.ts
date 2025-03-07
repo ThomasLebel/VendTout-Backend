@@ -36,7 +36,7 @@ router.post("/add", async (req: Request, res: Response) => {
                         totalPrice: req.body.totalPrice,
                         sellerPrice: req.body.sellerPrice,
                         paymentMethod: req.body.paymentMethod,
-                        status: "pending"
+                        status: "En attente"
                     });
                     await orderToAdd.save();
                     // product.isSold = true
@@ -106,6 +106,26 @@ router.put("/productReceived", async (req : Request, res : Response) => {
                     res.status(200).json({ result: true});
                 }
             }
+        }
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ result: false, error: "Internal server error" });
+        return;
+    }
+})
+
+// Route pour récupérer les commandes d'un utilisateur
+router.get('/:usertoken', async (req : Request, res : Response) => {
+    try {
+        const usertoken = req.params.usertoken
+        const user : IUser | null = await User.findOne({token : usertoken})
+        if (!user){
+            res.status(400).json({ result: false, error: "User not found" });
+            return;
+        } else {
+            const orders : IOrder[] | null = await Order.find({buyer : user._id}).populate('product', 'title photos').populate('seller', 'username -_id').select('-buyer -_id -__v')
+            const sales : IOrder[] | null = await Order.find({seller : user._id}).populate('product', 'title photos').populate('buyer', 'username -_id').select('-seller -_id -__v')
+            res.status(200).json({ result: true, orders : orders, sales : sales});
         }
     } catch (error) {
         console.error(error)

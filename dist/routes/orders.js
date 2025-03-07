@@ -50,7 +50,7 @@ router.post("/add", (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                         totalPrice: req.body.totalPrice,
                         sellerPrice: req.body.sellerPrice,
                         paymentMethod: req.body.paymentMethod,
-                        status: "pending"
+                        status: "En attente"
                     });
                     yield orderToAdd.save();
                     // product.isSold = true
@@ -126,6 +126,27 @@ router.put("/productReceived", (req, res) => __awaiter(void 0, void 0, void 0, f
                     res.status(200).json({ result: true });
                 }
             }
+        }
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ result: false, error: "Internal server error" });
+        return;
+    }
+}));
+// Route pour récupérer les commandes d'un utilisateur
+router.get('/:usertoken', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const usertoken = req.params.usertoken;
+        const user = yield User_1.default.findOne({ token: usertoken });
+        if (!user) {
+            res.status(400).json({ result: false, error: "User not found" });
+            return;
+        }
+        else {
+            const orders = yield Order_1.default.find({ buyer: user._id }).populate('product', 'title photos').populate('seller', 'username -_id').select('-buyer -_id -__v');
+            const sales = yield Order_1.default.find({ seller: user._id }).populate('product', 'title photos').populate('buyer', 'username -_id').select('-seller -_id -__v');
+            res.status(200).json({ result: true, orders: orders, sales: sales });
         }
     }
     catch (error) {
