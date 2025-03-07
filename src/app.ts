@@ -15,14 +15,14 @@ import ordersRouter from "./routes/orders";
 const app = express();
 
 // Configuration de CORS
-// const corsOptions = {
-//     origin: ['https://vendtout.vercel.app', 'http://localhost:3000', 'http://192.168.1.100:3000'],
-//     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
-//     credentials: true, // Autoriser les cookies
-//   };
+const corsOptions = {
+    origin: ['https://vendtout.vercel.app', 'http://localhost:3000', 'http://192.168.1.100:3000', 'https://2e3e-2a02-842a-3ac-c101-60db-7cdc-2632-c4ef.ngrok-free.app'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
+    credentials: true, // Autoriser les cookies
+  };
 
 // Configuration de CORS
-app.use(cors());
+app.use(cors(corsOptions));
 
 // Connexion à la base de données
 connectDatabase().catch(console.error);
