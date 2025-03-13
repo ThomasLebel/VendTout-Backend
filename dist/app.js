@@ -8,21 +8,18 @@ dotenv_1.default.config();
 const express_1 = __importDefault(require("express"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const morgan_1 = __importDefault(require("morgan"));
-const cors_1 = __importDefault(require("cors"));
 const connection_1 = require("./models/connection");
 const index_1 = __importDefault(require("./routes/index"));
 const users_1 = __importDefault(require("./routes/users"));
 const products_1 = __importDefault(require("./routes/products"));
 const orders_1 = __importDefault(require("./routes/orders"));
 const app = (0, express_1.default)();
-// // Configuration de CORS
-// const corsOptions = {
-//     origin: ['https://vendtout.vercel.app', 'http://localhost:3000', 'http://192.168.1.100:3000', 'https://2e3e-2a02-842a-3ac-c101-60db-7cdc-2632-c4ef.ngrok-free.app'],
-//     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
-//     credentials: true, // Autoriser les cookies
-//   };
 // Configuration de CORS
-app.use((0, cors_1.default)());
+const corsOptions = {
+    origin: ['https://vendtout.vercel.app', 'http://localhost:3000'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
+    credentials: true, // Autoriser les cookies
+};
 // Connexion à la base de données
 (0, connection_1.connectDatabase)().catch(console.error);
 // Configuration de fileUpload
