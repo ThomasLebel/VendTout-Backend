@@ -105,7 +105,7 @@ it("GET /users/profilePicture/:username", () => __awaiter(void 0, void 0, void 0
     const res = yield (0, supertest_1.default)(app_1.default).get("/users/profilePicture/test");
     expect(res.statusCode).toBe(200);
     expect(res.body.result).toBe(true);
-    expect(res.body.profilePicture).toBe("https://res.cloudinary.com/dkf48p2ah/image/upload/v1739526042/idkhe6v85woa3fdoszls.jpg");
+    expect(res.body.profilePicture).toBe("https://res.cloudinary.com/dkf48p2ah/image/upload/v1739809289/VendToutAvatars/mk8ihczepktfn61qdzh1.jpg");
 }));
 it("DELETE /users/delete", () => __awaiter(void 0, void 0, void 0, function* () {
     const res = yield (0, supertest_1.default)(app_1.default).delete("/users/delete").send({

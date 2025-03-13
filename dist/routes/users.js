@@ -29,7 +29,6 @@ const checkBody_1 = __importDefault(require("../modules/checkBody"));
 const User_1 = __importDefault(require("../models/User"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const uid2_1 = __importDefault(require("uid2"));
-const fs_1 = __importDefault(require("fs"));
 const cloudinary = require("cloudinary").v2;
 // Route pour l'inscription d'un utilisateur
 router.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -169,61 +168,58 @@ router.get("/profilePicture/:username", (req, res) => __awaiter(void 0, void 0, 
 }));
 // Route pour la modification du profil d'un utilisateur
 router.put("/profile", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a;
     try {
-        // On vérifie que le corps de la requête contient les champs requis
-        if (!(0, checkBody_1.default)(req.body, ["token", "aboutDescription", "country", "city"])) {
-            res.status(400).json({ result: false, error: "Missing or empty fields" });
+        // On vérifie si l'utilisateur existe
+        const user = yield User_1.default.findOne({ token: req.body.token });
+        if (!user) {
+            res.status(400).json({ result: false, error: "User not found" });
             return;
         }
         else {
-            // On vérifie si l'utilisateur existe
-            const user = yield User_1.default.findOne({ token: req.body.token });
-            if (!user) {
-                res.status(400).json({ result: false, error: "User not found" });
-                return;
-            }
-            else {
-                // On modifie le profil de l'utilisateur
-                user.aboutDescription = req.body.aboutDescription;
-                user.country = req.body.country;
-                user.city = req.body.city;
-                // On vérifie si l'utilisateur a uploadé une image de profil
-                if ((_a = req.files) === null || _a === void 0 ? void 0 : _a.profilePicture) {
-                    // On supprime l'ancien avatar uploadé sur Cloudinary
-                    if (user.profilePicture !==
-                        "https://res.cloudinary.com/dkf48p2ah/image/upload/v1739809289/VendToutAvatars/mk8ihczepktfn61qdzh1.jpg") {
-                        const publicId = (_b = user.profilePicture.match(/\/v\d+\/(.+)\.\w+$/)) === null || _b === void 0 ? void 0 : _b[1];
-                        yield cloudinary.uploader.destroy(publicId);
-                    }
-                    // On upload le nouvel avatar sur cloudinary
-                    const photoPath = `./tmp/${(0, uid2_1.default)(16)}.jpg`;
-                    const profilePicture = req.files.profilePicture;
-                    profilePicture.mv(photoPath);
-                    const resultCloudinary = yield cloudinary.uploader.upload(photoPath, {
+            // On modifie le profil de l'utilisateur
+            user.aboutDescription = req.body.aboutDescription;
+            user.country = req.body.country;
+            user.city = req.body.city;
+            // On vérifie si l'utilisateur a uploadé une image de profil
+            if ((_a = req.files) === null || _a === void 0 ? void 0 : _a.profilePicture) {
+                // On upload le nouvel avatar sur cloudinary
+                const profilePicture = req.files.profilePicture;
+                // On crée une stram d'upload
+                const uploadResult = yield new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream({
                         folder: "VendToutAvatars",
                         resource_type: "auto",
-                    });
-                    fs_1.default.unlinkSync(photoPath);
-                    if (resultCloudinary) {
-                        user.profilePicture = resultCloudinary.secure_url;
-                    }
-                    else {
-                        res.status(400).json({
-                            result: false,
-                            error: "Error uploading profile picture",
-                        });
-                        return;
-                    }
-                }
-                yield user.save();
-                const _c = user.toObject(), { password, _id, __v } = _c, userInfos = __rest(_c, ["password", "_id", "__v"]);
-                res.status(200).json({ result: true, userInfos });
+                        public_id: (0, uid2_1.default)(16),
+                    }, (error, result) => __awaiter(void 0, void 0, void 0, function* () {
+                        var _a;
+                        if (error) {
+                            console.error("Erreur lors de l'upload");
+                            reject(new Error("Internal server error"));
+                        }
+                        if (result) {
+                            // On supprime l'ancien avatar de cloudinary
+                            if (user.profilePicture !== "https://res.cloudinary.com/dkf48p2ah/image/upload/v1739809289/VendToutAvatars/mk8ihczepktfn61qdzh1.jpg") {
+                                const public_id = (_a = user.profilePicture.match(/\/v\d+\/(.+)\.\w+$/)) === null || _a === void 0 ? void 0 : _a[1];
+                                yield cloudinary.uploader.destroy(public_id);
+                            }
+                            user.profilePicture = result.secure_url;
+                            resolve(result);
+                        }
+                    }));
+                    stream.end(profilePicture.data);
+                });
+                yield uploadResult;
             }
+            yield user.save();
+            const _b = user.toObject(), { password, _id, __v } = _b, userInfos = __rest(_b, ["password", "_id", "__v"]);
+            res.status(200).json({ result: true, userInfos });
         }
     }
     catch (error) {
-        res.status(500).json({ result: false, error: "Internal server error" });
+        res
+            .status(500)
+            .json({ result: false, error: error.message || "Internal server error" });
     }
 }));
 // Route pour la modification des information personnelles d'un utilisateur

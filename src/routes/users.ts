@@ -141,13 +141,6 @@ router.get("/profilePicture/:username", async (req: Request, res: Response) => {
 
 router.put("/profile", async (req: Request, res: Response) => {
   try {
-    // On vérifie que le corps de la requête contient les champs requis
-    if (
-      !checkBody(req.body, ["token", "aboutDescription", "country", "city"])
-    ) {
-      res.status(400).json({ result: false, error: "Missing or empty fields" });
-      return;
-    } else {
       // On vérifie si l'utilisateur existe
       const user: IUser | null = await User.findOne({ token: req.body.token });
       if (!user) {
@@ -161,41 +154,50 @@ router.put("/profile", async (req: Request, res: Response) => {
 
         // On vérifie si l'utilisateur a uploadé une image de profil
         if (req.files?.profilePicture) {
-          // On supprime l'ancien avatar uploadé sur Cloudinary
-          if (
-            user.profilePicture !==
-            "https://res.cloudinary.com/dkf48p2ah/image/upload/v1739809289/VendToutAvatars/mk8ihczepktfn61qdzh1.jpg"
-          ) {
-            const publicId =
-              user.profilePicture.match(/\/v\d+\/(.+)\.\w+$/)?.[1];
-            await cloudinary.uploader.destroy(publicId);
-          }
           // On upload le nouvel avatar sur cloudinary
-          const photoPath: string = `./tmp/${uid2(16)}.jpg`;
           const profilePicture = req.files.profilePicture as UploadedFile;
-          profilePicture.mv(photoPath);
-          const resultCloudinary = await cloudinary.uploader.upload(photoPath, {
-            folder: "VendToutAvatars",
-            resource_type: "auto",
-          });
-          fs.unlinkSync(photoPath);
-          if (resultCloudinary) {
-            user.profilePicture = resultCloudinary.secure_url;
-          } else {
-            res.status(400).json({
-              result: false,
-              error: "Error uploading profile picture",
-            });
-            return;
+
+          // On crée une stram d'upload
+          const uploadResult = await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+              {
+                folder: "VendToutAvatars",
+                resource_type: "auto",
+                public_id: uid2(16),
+              },
+              async (error: any, result: any) => {
+  
+                if (error) {
+                  console.error("Erreur lors de l'upload");
+                  reject(new Error("Internal server error"));
+                }
+
+                if (result) {
+                  // On supprime l'ancien avatar de cloudinary
+                  if (user.profilePicture !== "https://res.cloudinary.com/dkf48p2ah/image/upload/v1739809289/VendToutAvatars/mk8ihczepktfn61qdzh1.jpg" ){
+                    const public_id = user.profilePicture.match(/\/v\d+\/(.+)\.\w+$/)?.[1];
+                    await cloudinary.uploader.destroy(public_id);
+                  }
+                  user.profilePicture = result.secure_url;
+                  resolve(result);
+                }      
+          })
+           stream.end(profilePicture.data);
           }
+          );
+
+          await uploadResult
         }
+
         await user.save();
         const { password, _id, __v, ...userInfos } = user.toObject();
         res.status(200).json({ result: true, userInfos });
       }
-    }
-  } catch (error) {
-    res.status(500).json({ result: false, error: "Internal server error" });
+    
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ result: false, error: error.message || "Internal server error" });
   }
 });
 

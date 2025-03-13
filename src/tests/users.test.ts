@@ -107,7 +107,7 @@ it("GET /users/profilePicture/:username", async () => {
   const res = await request(app).get("/users/profilePicture/test");
   expect(res.statusCode).toBe(200);
   expect(res.body.result).toBe(true);
-  expect(res.body.profilePicture).toBe("https://res.cloudinary.com/dkf48p2ah/image/upload/v1739526042/idkhe6v85woa3fdoszls.jpg");
+  expect(res.body.profilePicture).toBe("https://res.cloudinary.com/dkf48p2ah/image/upload/v1739809289/VendToutAvatars/mk8ihczepktfn61qdzh1.jpg");
 });
 
 it("DELETE /users/delete", async () => {

@@ -28,7 +28,6 @@ var router = express_1.default.Router();
 const checkBody_1 = __importDefault(require("../modules/checkBody"));
 const Product_1 = __importDefault(require("../models/Product"));
 const User_1 = __importDefault(require("../models/User"));
-const fs_1 = __importDefault(require("fs"));
 const uid2_1 = __importDefault(require("uid2"));
 const cloudinary = require("cloudinary").v2;
 // Route pour récupérer les derniers produits postés
@@ -59,7 +58,7 @@ router.get("/find/:page", (req, res) => __awaiter(void 0, void 0, void 0, functi
 }));
 // Route pour la création d'un produit
 router.post("/addItem", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a;
     try {
         // On vérifie que le corps de la requête contient les champs requis
         if (!(0, checkBody_1.default)(req.body, [
@@ -98,24 +97,32 @@ router.post("/addItem", (req, res) => __awaiter(void 0, void 0, void 0, function
                 });
                 let photosUrl = [];
                 if ((_a = req.files) === null || _a === void 0 ? void 0 : _a.photos) {
-                    const photos = (_b = req.files) === null || _b === void 0 ? void 0 : _b.photos;
+                    let photos;
+                    if (Array.isArray(req.files.photos)) {
+                        photos = req.files.photos;
+                    }
+                    else {
+                        photos = [req.files.photos];
+                    }
+                    // Création du stream d'upload
                     for (const photo of photos) {
-                        const photoPath = `./tmp/${(0, uid2_1.default)(16)}.jpg`;
-                        photo.mv(photoPath);
-                        const resultCloudinary = yield cloudinary.uploader.upload(photoPath, {
-                            folder: "VendToutProducts",
-                            resource_type: "auto",
+                        const uploadResult = yield new Promise((resolve, reject) => {
+                            const stream = cloudinary.uploader.upload_stream({
+                                folder: "VendToutProducts",
+                                ressource_type: "auto",
+                                public_id: (0, uid2_1.default)(16),
+                            }, (error, result) => {
+                                if (error) {
+                                    console.error("Erreur lors de l'upload");
+                                    reject(new Error("Internal server error"));
+                                }
+                                if (result) {
+                                    resolve(result.secure_url);
+                                }
+                            });
+                            stream.end(photo.data);
                         });
-                        fs_1.default.unlinkSync(photoPath);
-                        if (resultCloudinary) {
-                            photosUrl.push(resultCloudinary.secure_url);
-                        }
-                        else {
-                            res
-                                .status(400)
-                                .json({ result: false, error: "Error uploading photos" });
-                            return;
-                        }
+                        photosUrl.push(uploadResult);
                     }
                     productToAdd.photos = photosUrl;
                 }

@@ -16,7 +16,7 @@ router.get("/find/:page", async (req: Request, res: Response) => {
     const page: number = parseInt(req.params.page) || 1;
     const limit: number = 15;
     const skip: number = (page - 1) * limit;
-    const products: IProduct[] = await Product.find({isSold : false})
+    const products: IProduct[] = await Product.find({ isSold: false })
       .populate("userID", "username profilePicture -_id")
       .select("-__v")
       .sort({ createdAt: -1 })
@@ -75,29 +75,43 @@ router.post("/addItem", async (req: Request, res: Response) => {
           condition: req.body.condition,
           color: req.body.color,
         });
+
         let photosUrl: string[] = [];
+
         if (req.files?.photos) {
-          const photos: UploadedFile[] = req.files?.photos as UploadedFile[];
-          for (const photo of photos) {
-            const photoPath: string = `./tmp/${uid2(16)}.jpg`;
-            photo.mv(photoPath);
-            const resultCloudinary = await cloudinary.uploader.upload(
-              photoPath,
-              {
-                folder: "VendToutProducts",
-                resource_type: "auto",
-              }
-            );
-            fs.unlinkSync(photoPath);
-            if (resultCloudinary) {
-              photosUrl.push(resultCloudinary.secure_url);
-            } else {
-              res
-                .status(400)
-                .json({ result: false, error: "Error uploading photos" });
-              return;
-            }
+          let photos: UploadedFile[];
+          if (Array.isArray(req.files.photos)) {
+            photos = req.files.photos;
+          } else {
+            photos = [req.files.photos];
           }
+
+          // Création du stream d'upload
+          for (const photo of photos) {
+            const uploadResult = await new Promise<string>((resolve, reject) => {
+              const stream = cloudinary.uploader.upload_stream(
+                {
+                  folder: "VendToutProducts",
+                  ressource_type: "auto",
+                  public_id: uid2(16),
+                },
+                (error: any, result: any) => {
+                  if (error) {
+                    console.error("Erreur lors de l'upload");
+                    reject(new Error("Internal server error"));
+                  }
+
+                  if (result) {
+                    resolve(result.secure_url)
+                  }
+                }
+              );
+
+              stream.end(photo.data);
+            });
+            photosUrl.push(uploadResult)
+          }
+          
           productToAdd.photos = photosUrl;
         }
         const productAdded: IProduct = await productToAdd.save();
@@ -218,24 +232,24 @@ router.post("/filteredProducts", async (req: Request, res: Response) => {
     }
 
     if (gender) {
-      query.gender = {$regex : gender, $options: "i"};
+      query.gender = { $regex: gender, $options: "i" };
     }
     if (subCategory) {
-      query.subCategory = {$regex : subCategory, $options: "i"};
+      query.subCategory = { $regex: subCategory, $options: "i" };
     }
     if (size) {
-      query.size = {$regex : size, $options: "i"};
+      query.size = { $regex: size, $options: "i" };
     }
     if (condition) {
-      query.condition = {$regex : `^${condition}$`, $options: "i"};
+      query.condition = { $regex: `^${condition}$`, $options: "i" };
     }
     if (color) {
-      query.color = {$regex : color, $options: "i"};
+      query.color = { $regex: color, $options: "i" };
     }
     if (brand) {
-      query.brand = {$regex : brand, $options: "i"};
+      query.brand = { $regex: brand, $options: "i" };
     }
-    query.isSold = false
+    query.isSold = false;
 
     const products: IProduct[] = await Product.find(query)
       .populate("userID", "username profilePicture -_id")
