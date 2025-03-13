@@ -8,6 +8,7 @@ dotenv_1.default.config();
 const express_1 = __importDefault(require("express"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const morgan_1 = __importDefault(require("morgan"));
+const cors_1 = __importDefault(require("cors"));
 const connection_1 = require("./models/connection");
 const index_1 = __importDefault(require("./routes/index"));
 const users_1 = __importDefault(require("./routes/users"));
@@ -20,6 +21,8 @@ const corsOptions = {
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
     credentials: true, // Autoriser les cookies
 };
+// Configuration de CORS
+app.use((0, cors_1.default)(corsOptions));
 // Connexion à la base de données
 (0, connection_1.connectDatabase)().catch(console.error);
 // Configuration de fileUpload
