@@ -36,7 +36,7 @@
   - **TypeScript** pour un code typé, compilé avec `tsc`
  
 ## ⚡ API Endpoints
----
+
 ### 🙋‍♂️ Routes Users
 |Méthode|Route|Fonction|
 |-------|-----|--------|
@@ -52,7 +52,7 @@
 |`GET`|`/users/favourites/:userToken`|Récupération des articles mis en favoris|
 |`GET`|`/users/postedProducts/:username`|Récupération des articles actuellement en vente par un utilisateur|
 |`DELETE`|`/users/delete`|Suppression d'un utilisateur|
-
+---
 ### 👕 Routes Products
 |Méthode|Route|Fonction|
 |-------|-----|--------|
@@ -62,7 +62,7 @@
 |`POST`|`/like`|Ajout / suppression d'un like sur une annonce|
 |`POST`|`/filteredProducts`|Récupération des annonces correspondantes aux filtres reçus|
 |`DELETE`|`/:id`|Suppression d'une annonce|
-
+---
 ### 🛍 Routes Orders
 |Méthode|Route|Fonction|
 |-------|-----|--------|
@@ -70,7 +70,7 @@
 |`PUT`|`/orders/productSent`|Modification du statut de la commande sur "Envoyé"|
 |`PUT`|`/orders/productReceived`|Modification du statut de la commande sur "Terminé"|
 |`GET`|`/orders/:userToken`|Récupération des commandes et ventes d'un utilisateur|
-
+---
 ## 👨‍💻 Auteur
 Thomas Lebel\
 🔗 [Linkedin](https://www.linkedin.com/in/thomas-lebel-6047ba129/)\
