@@ -5,7 +5,7 @@
 
 ## 🚀 Démo en ligne
 🔗 Site déployé : [vendtout.vercel.app](https://vendtout.vercel.app/)\
-📹 Vidéo démo : [voir la vidéo démo](https://www.youtube.com/watch?v=MV_9-I8bRpU)
+📹 Vidéo démo : [voir la vidéo démo](https://www.youtube.com/watch?v=MV_9-I8bRpU)\
 🎨 Repo frontend : [accéder au repo frontend](https://github.com/ThomasLebel/VendTout-Frontend)
 
 ## 🧱 Stack technique
